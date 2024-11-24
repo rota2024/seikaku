@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>性格診断テスト</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans', sans-serif;
+            margin: 20px;
+            background: linear-gradient(135deg, #f0f8ff, #e6f2ff);
+            color: #333;
+        }
+        h1 {
+            text-align: center;
+            font-size: 2.5em;
+            color: #004080;
+        }
+        .question {
+            display: none;
+            background: #ffffff;
+            padding: 20px;
+            margin: 15px auto;
+            border-radius: 10px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            text-align: center;
+        }
+        .question.active {
+            display: block;
+        }
+        .question p {
+            font-size: 1.2em;
+            margin-bottom: 20px;
+            color: #004080;
+        }
+        .button-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+        button {
+            font-size: 1em;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background: #007bff;
+            color: #fff;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        #result {
+            margin-top: 30px;
+            background: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            max-width: 600px;
+            margin: 30px auto;
+            text-align: center;
+        }
+        #result h2 {
+            font-size: 2em;
+            color: #004080;
+        }
+        #result h3 {
+            text-align: left; /* タイトルも左揃え */
+            font-size: 1.5em;
+            margin-top: 15px;
+            color: #004080;
+        }
+        #result p {
+            font-size: 1.2em;
+            margin: 10px 0;
+            text-align: left; /* テキストを左揃えに設定 */
+        }
+    </style>
+</head>
+<body>
+    <h1>性格診断テスト</h1>
+
+    <!-- 質問 -->
+    <form id="quiz-form"></form>
+
+    <!-- 結果 -->
+    <div id="result" style="display: none;">
+        <h2>結果</h2>
+        <p id="result-text"></p>
+    </div>
+
+    <script>
+        const questions = [
+            "初対面の人と自然に会話ができる。",
+            "他人の気持ちを読み取るのが得意だ。",
+            "グループの中で会話をリードすることが多い。",
+            "意見が対立しても冷静に話し合える。",
+            "他人の話を最後までしっかり聞くことができる。",
+            "率直に意見を伝えるのが好きだ。",
+            "人前で話すことに抵抗を感じない。",
+            "友人や同僚と深い関係を築くのが得意だ。",
+            "人の輪に自然に入っていける。",
+            "ネガティブな話題でも冷静に対応できる。",
+            "スケジュール通りに行動するのが得意だ。",
+            "長期的な目標を立て、それに向かって努力する。",
+            "細かい作業を正確にこなせる。",
+            "締め切りを守ることを最優先に考える。",
+            "物事を後回しにすることは少ない。",
+            "計画を立てるのが好きだ。",
+            "複数のタスクを効率的に処理できる。",
+            "朝起きる時間や生活習慣を守れる。",
+            "目標を決めたら途中で諦めない。",
+            "他人に頼らずに自分で問題を解決しようとする。",
+            "ストレスがかかる状況でも冷静さを保てる。",
+            "ミスをしても気持ちを切り替えられる。",
+            "他人の批判を受け流すことができる。",
+            "感情が高ぶっても言動に表れにくい。",
+            "プレッシャーがある場面で実力を発揮できる。",
+            "ネガティブな感情に長くとらわれない。",
+            "他人の影響を受けすぎない。",
+            "困難な状況でも自分を信じられる。",
+            "自分の感情を言葉で整理するのが得意だ。",
+            "落ち込むより次の行動を考えることが多い。",
+            "新しいアイデアを考えるのが楽しい。",
+            "興味を持ったことにすぐに取り組む。",
+            "何事にも好奇心を持ちやすい。",
+            "新しいスキルを学ぶことに積極的だ。",
+            "創造的な問題解決を好む。",
+            "同じ作業を続けるより新しいことに挑戦したい。",
+            "未知の分野でも進んで飛び込む。",
+            "自分独自の視点で物事を考えるのが得意だ。",
+            "他人が見落とすようなチャンスを発見できる。",
+            "アイデアを形にする行動力がある。",
+            "他人を説得するのが得意だ。",
+            "チームの中でリーダー的な役割を担うことが多い。",
+            "他人の得意分野を見抜いて役割を割り振ることができる。",
+            "他人のモチベーションを引き出せる。",
+            "人と協力するのが好きだ。",
+            "意見の違いを調整して物事を進めるのが得意だ。",
+            "他人を公平に評価することを心がけている。",
+            "チーム全体の成功を優先する。",
+            "他人の失敗をフォローすることをいとわない。",
+            "周囲の人々をまとめることにやりがいを感じる。"
+        ];
+
+        const quizForm = document.getElementById('quiz-form');
+        questions.forEach((question, index) => {
+            const questionDiv = document.createElement('div');
+            questionDiv.className = 'question';
+            questionDiv.id = `q${index + 1}`;
+            if (index === 0) questionDiv.classList.add('active');
+            questionDiv.innerHTML = `
+                <p>${index + 1}. ${question}</p>
+                <div class="button-container">
+                    <button type="button" onclick="nextQuestion(1, ${index + 1})">YES</button>
+                    <button type="button" onclick="nextQuestion(0, ${index + 1})">NO</button>
+                </div>
+            `;
+            quizForm.appendChild(questionDiv);
+        });
+
+        let score = 0;
+
+        function nextQuestion(answerValue, questionNumber) {
+            score += answerValue;
+
+            const currentQuestion = document.getElementById(`q${questionNumber}`);
+            currentQuestion.classList.remove('active');
+
+            const nextQuestion = document.getElementById(`q${questionNumber + 1}`);
+            if (nextQuestion) {
+                nextQuestion.classList.add('active');
+            } else {
+                showResult();
+            }
+        }
+
+        function showResult() {
+            const resultDiv = document.getElementById('result');
+            const resultText = document.getElementById('result-text');
+
+            if (score <= 10) {
+                resultText.innerHTML = `
+                    <h2>0～10点: 内向的・注意派</h2>
+                    <h3>特徴:</h3>
+                    <p>静かな環境でじっくり考える慎重派。深く考えた選択を大切にします。</p>
+                    <h3>アドバイス:</h3>
+                    <p>新しい挑戦に小さく取り組むことで視野が広がり、成長のきっかけになります。</p>
+                `;
+            } else if (score <= 20) {
+                resultText.innerHTML = `
+                    <h2>11～20点: 現実主義者</h2>
+                    <h3>特徴:</h3>
+                    <p>計画的で安定を重視。堅実な選択をし、確実な成果を追求します。</p>
+                    <h3>アドバイス:</h3>
+                    <p>内藤をパイパンにせよ</p>
+                `;
+            } else if (score <= 30) {
+                resultText.innerHTML = `
+                    <h2>21～30点: 社交的バランス型</h2>
+                    <h3>特徴:</h3>
+                    <p>柔軟性と調和力が高く、社交性と一人の時間のバランスを保ちます。</p>
+                    <h3>アドバイス:</h3>
+                    <p>内藤を大五郎カットにせよ</p>
+                `;
+            } else if (score <= 40) {
+                resultText.innerHTML = `
+                    <h2>31～40点: 楽観的チャレンジャー</h2>
+                    <h3>特徴:</h3>
+                    <p>挑戦を楽しむエネルギッシュなタイプで、目標達成を追い求めます。</p>
+                    <h3>アドバイス:</h3>
+                    <p>内藤をモヒカンにせよ</p>
+                `;
+            } else {
+                resultText.innerHTML = `
+                    <h2>41～50点: 創造的リーダータイプ</h2>
+                    <h3>特徴:</h3>
+                    <p>創造力とリーダーシップに優れ、周囲を導く力を発揮します。</p>
+                    <h3>アドバイス:</h3>
+                    <p>内藤を5厘刈りにせよ</p>
+                `;
+            }
+
+            resultDiv.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
